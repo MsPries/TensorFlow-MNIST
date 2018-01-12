@@ -13,8 +13,8 @@ from MNIST import MNIST
 # predict random number from test set
 # predict number from image
 class MNISTTester(MNIST):
-    def __init__(self, model_path=None, data_path=None):
-        MNIST.__init__(self, model_path, data_path)
+    def __init__(self, model_path=None):
+        MNIST.__init__(self, model_path)
 
         self.init()
 
@@ -24,9 +24,6 @@ class MNISTTester(MNIST):
         self.init_session()
 
         self.load_model()
-
-        if self.data_path is not None:
-            self.load_training_data(self.data_path)
 
     def classify(self, feed_dict):
         number = self.sess.run(tf.argmax(self.model, 1), feed_dict)[0]
@@ -45,33 +42,12 @@ class MNISTTester(MNIST):
 
         self.print_status('CNN accuracy of test set: %f' % accuracy)
 
-    def predict_random(self, show_image=False):
-        num = randint(0, self.mnist.test.images.shape[0])
-        image = self.mnist.test.images[num]
-        label = self.mnist.test.labels[num]
+    def predict(self, img):
+        data = self.preprocess_image(img)
 
-        feed_dict = self.build_feed_dict(image.reshape(-1, 28, 28, 1), [label])
+        return self.classify({self.X: data})
 
-        (number, accuracy) = self.classify(feed_dict)
-        label = self.sess.run(tf.argmax(label, 0))
-
-        self.print_status('Predict random item: %d is %d, accuracy: %f' %
-                                              (label, number, accuracy))
-
-        if show_image is True:
-            plt.imshow(image.reshape(28, 28))
-            plt.show()
-
-    def predict(self, filename):
-        data = self.load_image(filename)
-
-        number, accuracy = self.classify({self.X: data})
-
-        self.print_status('%d is %s, accuracy: %f' % (number, os.path.basename(filename), accuracy))
-
-    def load_image(self, filename):
-        img = Image.open(filename).convert('L')
-
+    def preprocess_image(self, img):
         # resize to 28x28
         img = img.resize((28, 28), Image.ANTIALIAS).filter(ImageFilter.SHARPEN)
 

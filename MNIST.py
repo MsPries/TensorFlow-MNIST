@@ -21,9 +21,8 @@ class MNIST:
     p_keep_conv = tf.placeholder(tf.float32)
     p_keep_hidden = tf.placeholder(tf.float32)
 
-    def __init__(self, model_path=None, data_path=None):
+    def __init__(self, model_path=None):
         self.model_path = model_path
-        self.data_path = data_path
 
     def init_session(self):
         init = tf.global_variables_initializer()
@@ -31,13 +30,8 @@ class MNIST:
         self.sess.run(init)
 
     def print_status(self, text):
-        print '---'
-        print text
-
-    def load_training_data(self, data_path):
-        print 'Preparing MNIST data..'
-
-        self.mnist = input_data.read_data_sets(data_path, one_hot=True)
+        print ('---')
+        print (text)
 
     def build_feed_dict(self, X, Y, p_keep_conv=1., p_keep_hidden=1.):
         return {
@@ -78,13 +72,6 @@ class MNIST:
         self.model = tf.matmul(L4, W5, name='model')
 
         return self.model
-
-    def save_model(self):
-        if self.model_path is not None:
-            self.print_status('Saving my model..')
-
-            saver = tf.train.Saver(tf.global_variables())
-            saver.save(self.sess, self.model_path)
 
     def load_model(self):
         self.build_cnn_model()
